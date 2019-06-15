@@ -1,6 +1,6 @@
 package integrador.projeto.tensorflow.util;
 
-import integrador.projeto.tensorflow.ObjectDetector;
+import integrador.projeto.tensorflow.IdentificadorObjeto;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 /**
- * Util - Leitura dos arquivos de imagens, GraphDef e etiquetas.
+ * Util - Leitura dos arquivos de imagens, GraphDef e descricoes.
  */
 public final class IOUtil {
     private final static Logger logger = LoggerFactory.getLogger(IOUtil.class);
@@ -21,7 +21,7 @@ public final class IOUtil {
 
     public static byte[] lerTodosOsBytesOrSair(final String nomeArquivo) {
         try {
-            return IOUtils.toByteArray(ObjectDetector.class.getResourceAsStream(nomeArquivo));
+            return IOUtils.toByteArray(IdentificadorObjeto.class.getResourceAsStream(nomeArquivo));
         } catch (IOException | NullPointerException ex) {
             logger.error("Falha na leitura [{}]!", nomeArquivo);
             throw new ServicoException("Falha na leitura [" + nomeArquivo + "]!", ex);
@@ -30,7 +30,7 @@ public final class IOUtil {
 
     public static List<String> lerTodasAsLinhasOrSair(final String nomeArquivo) {
         try {
-            File file = new File(ObjectDetector.class.getResource(nomeArquivo).toURI());
+            File file = new File(IdentificadorObjeto.class.getResource(nomeArquivo).toURI());
             return Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
         } catch (IOException | URISyntaxException ex) {
             logger.error("Falha na leitura [{}]!", nomeArquivo, ex.getMessage());

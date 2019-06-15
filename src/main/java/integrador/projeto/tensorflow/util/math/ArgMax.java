@@ -1,45 +1,39 @@
 package integrador.projeto.tensorflow.util.math;
 
-/**
- * ArgMax function to select the higher value and its index from the array.
- *
- * Created by Zoltan Szabo on 1/5/18.
- * URL: https://github.com/szaza/android-yolo-v2
- */
 public class ArgMax {
 
-    private double[] params;
+    private double[] parametros;
 
-    public ArgMax(double[] params) {
-        this.params = params;
+    public ArgMax(double[] parametros) {
+        this.parametros = parametros;
     }
 
-    public Result getResult() {
+    public Resultado getResultado() {
         int maxIndex = 0;
-        for (int i=0; i<params.length; i++) {
-            if (params[maxIndex] < params[i]) {
+        for (int i = 0; i< parametros.length; i++) {
+            if (parametros[maxIndex] < parametros[i]) {
                 maxIndex = i;
             }
         }
 
-        return new Result(maxIndex, params[maxIndex]);
+        return new Resultado(maxIndex, parametros[maxIndex]);
     }
 
-    public class Result {
+    public class Resultado {
         private int index;
-        private double maxValue;
+        private double valorMaximo;
 
-        public Result(int index, double maxValue) {
+        public Resultado(int index, double valorMaximo) {
             this.index = index;
-            this.maxValue = maxValue;
+            this.valorMaximo = valorMaximo;
         }
 
         public int getIndex() {
             return index;
         }
 
-        public double getMaxValue() {
-            return maxValue;
+        public double getValorMaximo() {
+            return valorMaximo;
         }
     }
 }

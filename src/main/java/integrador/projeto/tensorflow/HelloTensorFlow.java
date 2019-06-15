@@ -13,7 +13,7 @@ public class HelloTensorFlow {
         try (Graph graph = new Graph()) {
             final String value = "Hello from " + TensorFlow.version();
 
-            // Construct the computation graph with a single operation, a constant
+            // Construct the computation graph with a single operation, a constante
             // named "MyConst" with a value "value".
             try (Tensor t = Tensor.create(value.getBytes("UTF-8"))) {
                 // The Java API doesn't yet include convenience functions for adding operations.

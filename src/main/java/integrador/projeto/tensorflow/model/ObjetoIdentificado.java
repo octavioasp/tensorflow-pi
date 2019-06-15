@@ -1,6 +1,6 @@
 package integrador.projeto.tensorflow.model;
 
-public final class Reconhecimento {
+public final class ObjetoIdentificado {
     /**
      * Um identificador exclusivo para o que foi reconhecido. Específico para a classe,
      * não para a instância do objeto.
@@ -10,8 +10,8 @@ public final class Reconhecimento {
     private final Float confidencia;
     private PosicaoDoBloco localizacao;
 
-    public Reconhecimento(final Integer id, final String title,
-                       final Float confidencia, final PosicaoDoBloco localizacao) {
+    public ObjetoIdentificado(final Integer id, final String title,
+                              final Float confidencia, final PosicaoDoBloco localizacao) {
         this.id = id;
         this.titulo = title;
         this.confidencia = confidencia;
@@ -44,10 +44,10 @@ public final class Reconhecimento {
 
     @Override
     public String toString() {
-        return "Recognition{" +
+        return "Identificação{" +
                 "id=" + id +
                 ", titulo='" + titulo + '\'' +
-                ", confidencia=" + confidencia +
+                ", confidência=" + confidencia +
                 ", localizacao=" + localizacao +
                 '}';
     }

@@ -1,39 +1,30 @@
 package integrador.projeto.tensorflow.util.math;
 
-/**
- * Implementation of the SoftMax function.
- * For more information please read this article:
- * https://en.wikipedia.org/wiki/Softmax_function
- *
- * Created by Zoltan Szabo on 1/5/18.
- * URL: https://github.com/szaza/android-yolo-v2
- */
-
 public class SoftMax {
-    private final double[] params;
+    private final double[] parametros;
 
-    public SoftMax(double[] params) {
-        this.params = params;
+    public SoftMax(double[] parametros) {
+        this.parametros = parametros;
     }
 
-    public double[] getValue() {
-        double sum = 0;
+    public double[] getValor() {
+        double soma = 0;
 
-        for (int i=0; i<params.length; i++) {
-            params[i] = Math.exp(params[i]);
-            sum += params[i];
+        for (int i = 0; i< parametros.length; i++) {
+            parametros[i] = Math.exp(parametros[i]);
+            soma += parametros[i];
         }
 
-        if (Double.isNaN(sum) || sum < 0) {
-            for (int i=0; i<params.length; i++) {
-                params[i] = 1.0 / params.length;
+        if (Double.isNaN(soma) || soma < 0) {
+            for (int i = 0; i< parametros.length; i++) {
+                parametros[i] = 1.0 / parametros.length;
             }
         } else {
-            for (int i=0; i<params.length; i++) {
-                params[i] = params[i] / sum;
+            for (int i = 0; i< parametros.length; i++) {
+                parametros[i] = parametros[i] / soma;
             }
         }
 
-        return params;
+        return parametros;
     }
 }
