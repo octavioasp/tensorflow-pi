@@ -1,8 +1,8 @@
 package integrador.projeto.tensorflow.util;
 
-import integrador.projeto.tensorflow.Config;
+import integrador.projeto.tensorflow.Configuracoes;
+import integrador.projeto.tensorflow.model.ObjetoIdentificado;
 import integrador.projeto.tensorflow.model.PosicaoDoBloco;
-import integrador.projeto.tensorflow.model.Reconhecimento;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class ImagemUtil {
     private static ImagemUtil imagemUtil;
 
     private ImagemUtil() {
-        IOUtil.criarDiretorioSeNaoExistir(new File(Config.OUTPUT_DIR));
+        IOUtil.criarDiretorioSeNaoExistir(new File(Configuracoes.OUTPUT_DIR));
     }
 
     /**
@@ -41,27 +41,27 @@ public class ImagemUtil {
     /**
      * Etiqueta com classes e previsões dadas pelo TensorFLow
      * @param imagem armazenada em buffer para etiqueta
-     * @param reconhecimentos lista de objetos reconhecidos
+     * @param objetoIdentificados lista de objetos reconhecidos
      */
-    public void etiquetaDaImagem(final byte[] imagem, final List<Reconhecimento> reconhecimentos, final String nomeDoArquivo) {
+    public void etiquetaDaImagem(final byte[] imagem, final List<ObjetoIdentificado> objetoIdentificados, final String nomeDoArquivo) {
         BufferedImage bufferedImage = imagemUtil.criarImagensParaBytes(imagem);
-        float escalaX = (float) bufferedImage.getWidth() / (float) Config.SIZE;
-        float escalaY = (float) bufferedImage.getHeight() / (float) Config.SIZE;
+        float escalaX = (float) bufferedImage.getWidth() / (float) Configuracoes.SIZE;
+        float escalaY = (float) bufferedImage.getHeight() / (float) Configuracoes.SIZE;
         Graphics2D graphics = (Graphics2D) bufferedImage.getGraphics();
 
-        for (Reconhecimento reconhecimento: reconhecimentos) {
-            PosicaoDoBloco box = reconhecimento.getLocalizacaoEscalonada(escalaX, escalaY);
+        for (ObjetoIdentificado objetoIdentificado : objetoIdentificados) {
+            PosicaoDoBloco box = objetoIdentificado.getLocalizacaoEscalonada(escalaX, escalaY);
             //desenhar o texto
-            graphics.drawString(reconhecimento.getTitulo() + " " + reconhecimento.getConfidencia(), box.getEsquerda(), box.getTopo() - 7);
+            graphics.drawString(objetoIdentificado.getTitulo() + " " + objetoIdentificado.getConfidencia(), box.getEsquerda(), box.getTopo() - 7);
             // desenhar a caixa delimitadora
             graphics.drawRect(box.getEsquerdaInt(),box.getTopoInt(), box.getLarguraInt(), box.getAlturaInt());
         }
 
         graphics.dispose();
-        saveImage(bufferedImage, Config.OUTPUT_DIR + "/" + nomeDoArquivo);
+        salvarImagem(bufferedImage, Configuracoes.OUTPUT_DIR + "/" + nomeDoArquivo);
     }
 
-    public void saveImage(final BufferedImage imagem, final String obj) {
+    public void salvarImagem(final BufferedImage imagem, final String obj) {
         try {
             ImageIO.write(imagem,"jpg", new File(obj));
         } catch (IOException e) {

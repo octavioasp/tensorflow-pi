@@ -2,8 +2,8 @@ package integrador.projeto.tensorflow.classificador;
 
 import com.google.common.collect.Lists;
 import integrador.projeto.tensorflow.model.LimiteDoBloco;
+import integrador.projeto.tensorflow.model.ObjetoIdentificado;
 import integrador.projeto.tensorflow.model.PosicaoDoBloco;
-import integrador.projeto.tensorflow.model.Reconhecimento;
 import integrador.projeto.tensorflow.util.math.ArgMax;
 import integrador.projeto.tensorflow.util.math.SoftMax;
 import org.apache.commons.math3.analysis.function.Sigmoid;
@@ -49,20 +49,20 @@ public class ClassificadorDeImagensYOLO {
      *
      * @param saidaTensorFLow saída do tensorFlow, eh um tensor de 13x13x((numero_de_classes +1) * 5)
      *                        125 = (numClass +  Tx, Ty, Tw, Th, To) * 5 - porque temos 5 caixas por celula
-     * @param etiquetas       um vetor de string com as etiquetas
+     * @param descricoes       um vetor de string com as descricoes
      * @return lista de objetos de reconhecimento.
      */
-    public List<Reconhecimento> classificarImagem(final float[] saidaTensorFLow, final List<String> etiquetas) {
+    public List<ObjetoIdentificado> classificarImagem(final float[] saidaTensorFLow, final List<String> descricoes) {
         int numeroDeClasses = (int) (saidaTensorFLow.length / (Math.pow(TAMANHO, 2) * NUMERO_DE_BLOCOS_DELIMITADORES) - 5);
         LimiteDoBloco[][][] posicaoDoBlocoPorCelula = new LimiteDoBloco[TAMANHO][TAMANHO][NUMERO_DE_BLOCOS_DELIMITADORES];
-        PriorityQueue<Reconhecimento> prioridadeNaFila = new PriorityQueue(MAXIMO_RECONHECIMENTO_CLASSES, new RecognitionComparator());
+        PriorityQueue<ObjetoIdentificado> prioridadeNaFila = new PriorityQueue(MAXIMO_RECONHECIMENTO_CLASSES, new RecognitionComparator());
 
         int offset = 0;
         for (int cy = 0; cy < TAMANHO; cy++) {        // TAMANHO * TAMANHO celulas
             for (int cx = 0; cx < TAMANHO; cx++) {
                 for (int b = 0; b < NUMERO_DE_BLOCOS_DELIMITADORES; b++) {   // 5 blocos delimitadores por cada célula
                     posicaoDoBlocoPorCelula[cx][cy][b] = getModelo(saidaTensorFLow, cx, cy, b, numeroDeClasses, offset);
-                    calcularPrincipaisPrevisoes(posicaoDoBlocoPorCelula[cx][cy][b], prioridadeNaFila, etiquetas);
+                    calcularPrincipaisPrevisoes(posicaoDoBlocoPorCelula[cx][cy][b], prioridadeNaFila, descricoes);
                     offset = offset + numeroDeClasses + 5;
                 }
             }
@@ -89,13 +89,13 @@ public class ClassificadorDeImagensYOLO {
         return modelo;
     }
 
-    private void calcularPrincipaisPrevisoes(final LimiteDoBloco limiteDoBloco, final PriorityQueue<Reconhecimento> previsaoFila,
-                                             final List<String> etiquetas) {
+    private void calcularPrincipaisPrevisoes(final LimiteDoBloco limiteDoBloco, final PriorityQueue<ObjetoIdentificado> previsaoFila,
+                                             final List<String> descricoes) {
         for (int i = 0; i < limiteDoBloco.getClasses().length; i++) {
-            ArgMax.Result argMax = new ArgMax(new SoftMax(limiteDoBloco.getClasses()).getValue()).getResult();
-            double confideciaDaClasse = argMax.getMaxValue() * limiteDoBloco.getConfidencia();
+            ArgMax.Resultado argMax = new ArgMax(new SoftMax(limiteDoBloco.getClasses()).getValor()).getResultado();
+            double confideciaDaClasse = argMax.getValorMaximo() * limiteDoBloco.getConfidencia();
             if (confideciaDaClasse > LIMITE) {
-                previsaoFila.add(new Reconhecimento(argMax.getIndex(), etiquetas.get(argMax.getIndex()), (float) confideciaDaClasse,
+                previsaoFila.add(new ObjetoIdentificado(argMax.getIndex(), descricoes.get(argMax.getIndex()), (float) confideciaDaClasse,
                         new PosicaoDoBloco((float) (limiteDoBloco.getX() - limiteDoBloco.getLargura() / 2),
                                 (float) (limiteDoBloco.getY() - limiteDoBloco.getAltura() / 2),
                                 (float) limiteDoBloco.getLargura(),
@@ -104,29 +104,29 @@ public class ClassificadorDeImagensYOLO {
         }
     }
 
-    private List<Reconhecimento> getReconhecimento(final PriorityQueue<Reconhecimento> priorityQueue) {
-        List<Reconhecimento> reconhecimentos = Lists.newArrayList();
+    private List<ObjetoIdentificado> getReconhecimento(final PriorityQueue<ObjetoIdentificado> priorityQueue) {
+        List<ObjetoIdentificado> objetoIdentificados = Lists.newArrayList();
 
         if (priorityQueue.size() > 0) {
-            // Melhor Reconhecimento
-            Reconhecimento melhorReconhecimento = priorityQueue.poll();
-            reconhecimentos.add(melhorReconhecimento);
+            // Melhor ObjetoIdentificado
+            ObjetoIdentificado objetoIdentificadoMelhor = priorityQueue.poll();
+            objetoIdentificados.add(objetoIdentificadoMelhor);
 
             for (int i = 0; i < Math.min(priorityQueue.size(), MAXIMO_RESULTADOS); ++i) {
-                Reconhecimento reconhecimento = priorityQueue.poll();
+                ObjetoIdentificado objetoIdentificado = priorityQueue.poll();
                 boolean sobreposicoes = false;
-                for (Reconhecimento reconhecimentoPrevio : reconhecimentos) {
-                    sobreposicoes = sobreposicoes || (getInterseccaoProporcional(reconhecimentoPrevio.getLocalizacao(),
-                            reconhecimento.getLocalizacao()) > LIMITE_DE_SOBREPOSICAO);
+                for (ObjetoIdentificado objetoIdentificadoPrevio : objetoIdentificados) {
+                    sobreposicoes = sobreposicoes || (getInterseccaoProporcional(objetoIdentificadoPrevio.getLocalizacao(),
+                            objetoIdentificado.getLocalizacao()) > LIMITE_DE_SOBREPOSICAO);
                 }
 
                 if (!sobreposicoes) {
-                    reconhecimentos.add(reconhecimento);
+                    objetoIdentificados.add(objetoIdentificado);
                 }
             }
         }
 
-        return reconhecimentos;
+        return objetoIdentificados;
     }
 
     private float getInterseccaoProporcional(PosicaoDoBloco formaPrimaria, PosicaoDoBloco formaSecundaria) {
@@ -149,10 +149,10 @@ public class ClassificadorDeImagensYOLO {
     }
 
     // // Invertido intencionalmente pra manter uma alta confidencia no topo da fila.
-    private class RecognitionComparator implements Comparator<Reconhecimento> {
+    private class RecognitionComparator implements Comparator<ObjetoIdentificado> {
         @Override
-        public int compare(final Reconhecimento reconhecimento1, final Reconhecimento reconhecimento2) {
-            return Float.compare(reconhecimento2.getConfidencia(), reconhecimento1.getConfidencia());
+        public int compare(final ObjetoIdentificado objetoIdentificado1, final ObjetoIdentificado objetoIdentificado2) {
+            return Float.compare(objetoIdentificado2.getConfidencia(), objetoIdentificado1.getConfidencia());
         }
     }
 }

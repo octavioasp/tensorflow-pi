@@ -3,7 +3,7 @@ package integrador.projeto.tensorflow;
 /**
  * Configuration file for TensorFlow Java Yolo application
  */
-public interface Config {
+public interface Configuracoes {
     String GRAPH_FILE = "/YOLO/yolo-voc.pb";
     String LABEL_FILE = "/YOLO/yolo-voc-labels.txt";
 
