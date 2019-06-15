@@ -17,36 +17,36 @@ public class ConstrutorGrafico {
         return binaryOp("Div", x, y);
     }
 
-    public <T> Output<Float> resizeBilinear(Output<T> imagens, Output<Integer> tamanho) {
-        return binaryOp3("RedimensionamentoBilinear", imagens, tamanho);
+    public <T> Output<Float> resizeBilinear(Output<T> images, Output<Integer> size) {
+        return binaryOp3("ResizeBilinear", images, size);
     }
 
-    public <T> Output<T> expandDims(Output<T> entrada, Output<Integer> dimensao) {
-        return binaryOp3("ExpandirDimensao", entrada, dimensao);
+    public <T> Output<T> expandDims(Output<T> input, Output<Integer> dim) {
+        return binaryOp3("ExpandDims", input, dim);
     }
 
-    public <T, U> Output<U> cast(Output<T> valor, Class<U> tipo) {
-        DataType dtype = DataType.fromClass(tipo);
-        return grafico.opBuilder("Conversao", "Conversao")
-                .addInput(valor)
+    public <T, U> Output<U> cast(Output<T> value, Class<U> type) {
+        DataType dtype = DataType.fromClass(type);
+        return grafico.opBuilder("Cast", "Cast")
+                .addInput(value)
                 .setAttr("DstT", dtype)
                 .build()
                 .<U>output(0);
     }
 
     public Output<UInt8> decodificarJpeg(Output<String> conteudo, long canais) {
-        return grafico.opBuilder("JpegDecodificado", "JpegDecodificado")
+        return grafico.opBuilder("DecodeJpeg", "DecodeJpeg")
                 .addInput(conteudo)
-                .setAttr("canais", canais)
+                .setAttr("channels", canais)
                 .build()
                 .<UInt8>output(0);
     }
 
     public <T> Output<T> constante(String name, Object valor, Class<T> tipo) {
         try (Tensor<T> t = Tensor.<T>create(valor, tipo)) {
-            return grafico.opBuilder("Constante", name)
-                    .setAttr("tipo", DataType.fromClass(tipo))
-                    .setAttr("valor", t)
+            return grafico.opBuilder("Const", name)
+                    .setAttr("dtype", DataType.fromClass(tipo))
+                    .setAttr("value", t)
                     .build()
                     .<T>output(0);
         }
